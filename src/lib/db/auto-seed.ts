@@ -73,26 +73,24 @@ export async function autoSeedBuiltinRulebook(): Promise<void> {
       const dbPath = process.env.DATABASE_PATH || "./data/dnd.db";
       const absDbPath = path.resolve(process.cwd(), dbPath);
 
-      // 确保目录存在
       fs.mkdirSync(path.dirname(absDbPath), { recursive: true });
 
-      // 删除旧的小样本规则书记录（避免预构建 DB 加载后残留）
-      const oldBooks = listRulebooks();
-      for (const b of oldBooks) {
-        if ((b.chunk_count ?? 0) < 1000) {
-          console.log(`[auto-seed] 清理旧规则书: ${b.name} (${b.chunk_count} chunks)`);
-          deleteRulebook(b.id);
-        }
-      }
+      // 先关闭当前 DB 连接，否则 SQLite 文件被锁无法覆盖
+      const { resetDb } = await import("./index");
+      resetDb();
 
       const gz = fs.readFileSync(PREBUILT_GZ);
       const dbBuf = zlib.gunzipSync(gz);
+
+      // 删除旧的 WAL/SHM 文件
+      for (const ext of ["-wal", "-shm"]) {
+        const p = absDbPath + ext;
+        if (fs.existsSync(p)) fs.unlinkSync(p);
+      }
+
       fs.writeFileSync(absDbPath, dbBuf);
 
       console.log(`[auto-seed] ✅ 预构建数据库已加载 (${(dbBuf.length / 1024 / 1024).toFixed(1)} MB)`);
-      // 重置 DB 连接，让下一次请求重新打开新 DB
-      const { resetDb } = await import("./index");
-      resetDb();
       _seeding = false;
       return;
     } catch (e) {
