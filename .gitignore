@@ -1,0 +1,29 @@
+node_modules/
+.next/
+out/
+dist/
+build/
+
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+data/*.db
+data/*.db-journal
+data/*.db-shm
+data/*.db-wal
+data/uploads/
+
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+.vscode/
+.idea/
+
+# 种子文件通过 Git LFS 追踪
+# src/data/rulebook-seed.json.gz  ← 由 .gitattributes 的 *.gz 规则自动用 LFS

@@ -1,0 +1,171 @@
+export interface Background {
+  name: string;
+  skillProficiencies: string[];
+  toolProficiencies: string[];
+  languages: number;
+  feature: string;
+  equipment: string[];
+  gold: number;
+  suggestedTraits: string[];
+  suggestedIdeals: string[];
+  suggestedBonds: string[];
+  suggestedFlaws: string[];
+  source: string;
+}
+
+export const BACKGROUNDS: Background[] = [
+  {
+    name: "侍僧",
+    skillProficiencies: ["洞悉", "宗教"],
+    toolProficiencies: [],
+    languages: 2,
+    feature: "信仰庇护: 同信仰圣殿可获得免费治疗与住宿。",
+    equipment: ["圣徽", "祷告书", "熏香x5", "法衣", "普通服装"],
+    gold: 15,
+    suggestedTraits: ["我对故乡的神灵充满虔诚", "我引用古老经文来回答任何问题", "我对其他信仰的人宽容且好奇"],
+    suggestedIdeals: ["传统: 必须保护并尊重古老传统", "慈善: 我总是试图帮助有需要的人", "信仰: 我相信神灵会指引我的道路"],
+    suggestedBonds: ["我愿为保护圣殿付出一切", "我欠一位恩人太多太多", "我要找回一件被盗的圣物"],
+    suggestedFlaws: ["我对异教徒毫不留情", "我过度信任教会权威", "一旦确定目标便固执到底"],
+    source: "PHB",
+  },
+  {
+    name: "罪犯",
+    skillProficiencies: ["欺瞒", "隐匿"],
+    toolProficiencies: ["一种游戏组", "盗贼工具"],
+    languages: 0,
+    feature: "罪犯联络员: 你在犯罪界有一个可靠的联络人。",
+    equipment: ["撬棍", "深色普通服装（带兜帽）"],
+    gold: 15,
+    suggestedTraits: ["我总是留有后路", "事情出了差错我第一个想到的就是跑", "我永远不会出卖朋友"],
+    suggestedIdeals: ["荣誉: 盗亦有道", "自由: 锁链是要被打破的", "贪婪: 我做一切都是为了钱"],
+    suggestedBonds: ["我欠某人一大笔钱，必须还清", "我的同伙对我非常重要", "我要弥补过去犯下的罪行"],
+    suggestedFlaws: ["看到闪亮的东西就忍不住", "我一旦有了计划就停不下来", "贪杯是我最大的弱点"],
+    source: "PHB",
+  },
+  {
+    name: "民间英雄",
+    skillProficiencies: ["驯兽", "生存"],
+    toolProficiencies: ["一种工匠工具", "载具（陆地）"],
+    languages: 0,
+    feature: "好客乡民: 平民会为你提供庇护和帮助。",
+    equipment: ["铁锅", "铲子", "普通服装"],
+    gold: 10,
+    suggestedTraits: ["我相信每个人都有善良的一面", "面对不公我绝不退缩", "我用朴素的道理解释复杂的事"],
+    suggestedIdeals: ["尊重: 人人都值得被尊重", "公正: 没有人凌驾于法律之上", "自由: 暴君终将被推翻"],
+    suggestedBonds: ["我的家乡正在受难", "我要保护那些不能保护自己的人", "我深爱着故乡的某个人"],
+    suggestedFlaws: ["我不信任贵族和权威", "我固执己见很难改变主意", "面对强大的敌人我会犹豫"],
+    source: "PHB",
+  },
+  {
+    name: "贵族",
+    skillProficiencies: ["历史", "说服"],
+    toolProficiencies: ["一种游戏组"],
+    languages: 1,
+    feature: "特权地位: 高等社会接纳你,平民会尽力满足你的要求。",
+    equipment: ["高档服装", "玺戒", "家谱卷轴"],
+    gold: 25,
+    suggestedTraits: ["我的奉承让人如沐春风", "平民对我来说不值一提", "我的血统高贵，自当与众不同"],
+    suggestedIdeals: ["责任: 保护领民是我的义务", "权力: 有了权力就能改变世界", "家族: 血脉的荣耀高于一切"],
+    suggestedBonds: ["我要恢复家族昔日的荣光", "我的家族有一个可怕的秘密", "我要向毁灭我家族的人复仇"],
+    suggestedFlaws: ["我无法忍受侮辱", "我秘密里欣赏平民的自由", "奢侈生活让我挥金如土"],
+    source: "PHB",
+  },
+  {
+    name: "学者",
+    skillProficiencies: ["奥秘", "历史"],
+    toolProficiencies: [],
+    languages: 2,
+    feature: "研究者: 你知道从何处或何人身上获取学识。",
+    equipment: ["墨水瓶", "鹅毛笔", "小刀", "学者服装"],
+    gold: 10,
+    suggestedTraits: ["我在笔记本里记下每一件稀奇事", "知识就是最好的宝藏", "我总是用事实和逻辑说服别人"],
+    suggestedIdeals: ["知识: 知识是驱散黑暗的光", "权力: 知识就是权力", "美: 宇宙的奥秘是最美的艺术"],
+    suggestedBonds: ["我要找到一本失落的古书", "我的老师对我影响深远", "图书馆是我的避风港"],
+    suggestedFlaws: ["我沉迷于知识无法自拔", "大部分人在我看来都很无知", "我坚信没有什么问题是解决不了的"],
+    source: "PHB",
+  },
+  {
+    name: "水手",
+    skillProficiencies: ["运动", "察觉"],
+    toolProficiencies: ["领航工具", "载具（水上）"],
+    languages: 0,
+    feature: "船家路子: 你可以为团队谋得免费的顺风船旅行。",
+    equipment: ["短棍", "丝绳50尺", "幸运物", "普通服装"],
+    gold: 10,
+    suggestedTraits: ["我的朋友知道可以信赖我", "我在陆地上总觉得不自在", "我随口就能讲出航海故事"],
+    suggestedIdeals: ["自由: 大海象征着自由", "公正: 船上人人平等", "掌控: 船长说了算"],
+    suggestedBonds: ["我的船就是我的家", "我无法忘记那次海难", "我欠一位船长的救命之恩"],
+    suggestedFlaws: ["我喝酒没有节制", "大海让我对陆地生活不耐烦", "我从不原谅叛徒"],
+    source: "PHB",
+  },
+  {
+    name: "士兵",
+    skillProficiencies: ["运动", "威吓"],
+    toolProficiencies: ["一种游戏组", "载具（陆地）"],
+    languages: 0,
+    feature: "军阶: 你的军阶让其他士兵遵从你的命令。",
+    equipment: ["军阶徽章", "战利品", "骰子组", "普通服装"],
+    gold: 10,
+    suggestedTraits: ["我会讲不完的战场故事", "我对战友有着无限忠诚", "我在压力下保持冷静"],
+    suggestedIdeals: ["荣耀: 战场上的荣耀永不褪色", "国家: 我的国家高于一切", "活着: 活着才是最重要的"],
+    suggestedBonds: ["我永远不会忘记倒下的同伴", "我要保护那些无法保护自己的人", "我的军队就是我的家"],
+    suggestedFlaws: ["我无法忘记过去的恐惧", "敌人是要被消灭的", "我对平民的抱怨没有耐心"],
+    source: "PHB",
+  },
+  {
+    name: "江湖艺人",
+    skillProficiencies: ["特技", "表演"],
+    toolProficiencies: ["易容工具", "一种乐器"],
+    languages: 0,
+    feature: "人见人爱: 每晚维持演出可获免费食宿。",
+    equipment: ["一种乐器", "仰慕者赠物", "表演服装"],
+    gold: 15,
+    suggestedTraits: ["我热爱聚光灯", "微笑是最好的伪装", "我为掌声而活"],
+    suggestedIdeals: ["美: 艺术让世界更美好", "传统: 表演传承了古老的故事", "创新: 艺术需要不断突破"],
+    suggestedBonds: ["我要超越我的师傅", "舞台就是我的战场", "我有一位一直支持我的人"],
+    suggestedFlaws: ["我受不了被忽视", "一句差评就能毁掉我的一天", "我沉迷于掌声和赞美"],
+    source: "PHB",
+  },
+  {
+    name: "隐士",
+    skillProficiencies: ["医疗", "宗教"],
+    toolProficiencies: ["草药工具"],
+    languages: 1,
+    feature: "探索: 你在隐居中发现了独特而强大的秘密。",
+    equipment: ["卷轴匣", "冬衣", "草药工具", "普通服装"],
+    gold: 5,
+    suggestedTraits: ["我很久没跟人说话了", "我在沉思中找到答案", "自然界比文明世界更令我自在"],
+    suggestedIdeals: ["知识: 真理等待被发现", "自由: 羁绊阻碍启迪", "逻辑: 情绪不应影响判断"],
+    suggestedBonds: ["我在隐居中发现了重大秘密", "我要保护某个神圣之地", "我被迫离开修行之所"],
+    suggestedFlaws: ["我不善社交", "我对世俗的东西嗤之以鼻", "我偏执地相信自己的发现"],
+    source: "PHB",
+  },
+  {
+    name: "化外之民",
+    skillProficiencies: ["运动", "生存"],
+    toolProficiencies: ["一种乐器"],
+    languages: 1,
+    feature: "漂泊者: 你对记忆地图和地形的能力惊人,每天可获取食物和饮水。",
+    equipment: ["长棍", "猎具", "部落战利品", "旅行者服装"],
+    gold: 10,
+    suggestedTraits: ["我在城市里比在荒野更不自在", "我用自然来比喻一切事物", "我对大自然有着深深的敬畏"],
+    suggestedIdeals: ["变化: 生命如同四季更迭", "荣耀: 我的功绩为部落带来荣光", "自然: 自然界最伟大"],
+    suggestedBonds: ["我的部落是我的一切", "大自然的平衡必须被维护", "我要找到失散的族人"],
+    suggestedFlaws: ["我无法理解城市的规则", "面对文明世界我感到无所适从", "暴力是解决问题的第一选择"],
+    source: "PHB",
+  },
+  { name: "骗子", skillProficiencies: ["欺瞒", "巧手"], toolProficiencies: ["易容工具", "伪造工具"], languages: 0, feature: "假身份: 你拥有完整的第二身份。", equipment: ["高档服装", "易容工具", "骗术道具"], gold: 15, suggestedTraits: [], suggestedIdeals: [], suggestedBonds: [], suggestedFlaws: [], source: "PHB" },
+  { name: "密探", skillProficiencies: ["欺瞒", "隐匿"], toolProficiencies: ["一种游戏组", "盗贼工具"], languages: 0, feature: "罪犯联络员", equipment: ["撬棍", "深色服装"], gold: 15, suggestedTraits: [], suggestedIdeals: [], suggestedBonds: [], suggestedFlaws: [], source: "PHB" },
+  { name: "角斗士", skillProficiencies: ["特技", "表演"], toolProficiencies: ["易容工具", "一种乐器"], languages: 0, feature: "人见人爱", equipment: ["武器(作为表演道具)", "表演服装"], gold: 15, suggestedTraits: [], suggestedIdeals: [], suggestedBonds: [], suggestedFlaws: [], source: "PHB" },
+  { name: "公会工匠", skillProficiencies: ["洞悉", "说服"], toolProficiencies: ["一种工匠工具"], languages: 1, feature: "公会成员: 公会提供食宿和会馆。", equipment: ["工匠工具", "介绍信", "旅行者服装"], gold: 15, suggestedTraits: [], suggestedIdeals: [], suggestedBonds: [], suggestedFlaws: [], source: "PHB" },
+  { name: "公会商人", skillProficiencies: ["洞悉", "说服"], toolProficiencies: ["领航工具"], languages: 1, feature: "公会成员", equipment: ["商人道具", "介绍信", "旅行者服装"], gold: 15, suggestedTraits: [], suggestedIdeals: [], suggestedBonds: [], suggestedFlaws: [], source: "PHB" },
+  { name: "骑士", skillProficiencies: ["历史", "说服"], toolProficiencies: ["一种游戏组"], languages: 1, feature: "家仆: 三名忠于家族的家仆。", equipment: ["高档服装", "玺戒"], gold: 25, suggestedTraits: [], suggestedIdeals: [], suggestedBonds: [], suggestedFlaws: [], source: "PHB" },
+  { name: "海盗", skillProficiencies: ["运动", "察觉"], toolProficiencies: ["领航工具", "载具（水上）"], languages: 0, feature: "船家路子", equipment: ["短棍", "丝绳50尺"], gold: 10, suggestedTraits: [], suggestedIdeals: [], suggestedBonds: [], suggestedFlaws: [], source: "PHB" },
+  { name: "流浪儿", skillProficiencies: ["巧手", "隐匿"], toolProficiencies: ["易容工具", "盗贼工具"], languages: 0, feature: "城中秘密: 可在市区内以两倍速度穿行。", equipment: ["小刀", "城市地图", "宠物鼠", "普通服装"], gold: 10, suggestedTraits: [], suggestedIdeals: [], suggestedBonds: [], suggestedFlaws: [], source: "PHB" },
+];
+
+export function getBackground(name: string): Background | undefined {
+  return BACKGROUNDS.find((b) => b.name === name);
+}
+
+export const BACKGROUND_NAMES = BACKGROUNDS.map((b) => b.name);
