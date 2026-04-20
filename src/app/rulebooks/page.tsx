@@ -7,14 +7,15 @@ import { PixelBadge } from "@/components/ui/PixelBadge";
 import { useRulebookStore } from "@/stores/rulebook-store";
 
 export default function RulebooksPage() {
-  const { rulebooks, fetch: fetchBooks, remove, loading } = useRulebookStore();
+  const { rulebooks, fetch: fetchBooks, remove } = useRulebookStore();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialized, setInitialized] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetchBooks();
-    const t = setInterval(fetchBooks, 3000);
+    fetchBooks().finally(() => setInitialized(true));
+    const t = setInterval(fetchBooks, 5000);
     return () => clearInterval(t);
   }, [fetchBooks]);
 
@@ -119,7 +120,16 @@ export default function RulebooksPage() {
         </div>
       </PixelCard>
 
-      {rulebooks.length === 0 && !loading && (
+      {!initialized && (
+        <PixelCard>
+          <div className="py-8 text-center text-text-muted">
+            <Loader2 size={32} className="mx-auto mb-2 opacity-40 animate-spin" />
+            <div className="font-silk text-pixel-base">加载中...</div>
+          </div>
+        </PixelCard>
+      )}
+
+      {initialized && rulebooks.length === 0 && (
         <PixelCard>
           <div className="py-8 text-center text-text-muted">
             <BookOpen size={48} className="mx-auto mb-2 opacity-40" />
