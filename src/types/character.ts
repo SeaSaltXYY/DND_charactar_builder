@@ -105,6 +105,7 @@ export interface CharacterDraft {
   ability_scores: AbilityScores;
   ability_racial: Partial<AbilityScores>;
   ability_growth: Partial<AbilityScores>;
+  useTashaRules: boolean;
 
   // --- 战斗 ---
   hp: number;

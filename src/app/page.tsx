@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, Map, MessageSquare, UserPlus, Sparkles, Dices } from "lucide-react";
+import { BookOpen, MessageSquare, UserPlus, Sparkles, Dices } from "lucide-react";
 import { PixelCard } from "@/components/ui/PixelCard";
 
 const FEATURES = [
@@ -11,15 +11,8 @@ const FEATURES = [
     color: "#ffd700",
   },
   {
-    href: "/campaign",
-    title: "模组背景导入",
-    desc: "粘贴文字或上传截图（OCR），把你的冒险世界作为 AI 的背景上下文。",
-    icon: Map,
-    color: "#44ff44",
-  },
-  {
     href: "/chat",
-    title: "规则 RAG 问答",
+    title: "规则问答",
     desc: "严格基于规则书裁决问题，答案附引用来源，支持流式打字机效果。",
     icon: MessageSquare,
     color: "#4488ff",
@@ -49,10 +42,10 @@ export default function HomePage() {
             🎲 D&amp;D 5e Rulebook Assistant
           </h1>
           <p className="relative mx-auto mt-4 max-w-2xl font-silk text-pixel-base text-text-primary">
-            规则书 RAG · 模组背景 · 建卡向导 · 骰子工具
+            规则书问答 · 建卡向导 · 骰子工具
           </p>
           <p className="relative mx-auto mt-2 max-w-2xl text-base text-text-muted">
-            由规则书驱动的 DM 助手 · 所有回答均可溯源 · 像素风 UI
+            由规则书驱动的 DM 助手 · 所有回答均可溯源
           </p>
           <div className="relative mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link href="/rulebooks" className="pixel-btn pixel-btn-gold">
@@ -68,7 +61,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2">
+      <section className="grid gap-4 md:grid-cols-3">
         {FEATURES.map((f) => {
           const Icon = f.icon;
           return (
@@ -101,10 +94,6 @@ export default function HomePage() {
             <li>
               前往 <Link href="/rulebooks" className="text-pixel-blue underline">规则书</Link>
               页面上传 5e 规则书（PDF / TXT / MD / CHM）。
-            </li>
-            <li>
-              可选：在 <Link href="/campaign" className="text-pixel-blue underline">模组背景</Link> 页面
-              粘贴你的冒险设定。
             </li>
             <li>
               进入 <Link href="/chat" className="text-pixel-blue underline">规则问答</Link> 向 AI 提问，

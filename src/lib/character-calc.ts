@@ -122,21 +122,24 @@ export function autoFillFromRace(draft: CharacterDraft): Partial<CharacterDraft>
   const race = getRace(draft.race ?? "");
   if (!race) return {};
 
-  const patch: Partial<CharacterDraft> = {
-    size: race.size,
-    speed: race.speed,
-    ability_racial: { ...race.abilityBonus } as Partial<AbilityScores>,
-  };
-
   const sub = draft.subrace
     ? race.subraces.find((s) => s.name === draft.subrace)
     : undefined;
 
-  if (sub?.abilityBonus) {
-    patch.ability_racial = {
-      ...race.abilityBonus,
-      ...sub.abilityBonus,
-    } as Partial<AbilityScores>;
+  const patch: Partial<CharacterDraft> = {
+    size: race.size,
+    speed: race.speed,
+  };
+
+  // 塔莎规则：种族加值由玩家自定义，不自动设置
+  if (!draft.useTashaRules) {
+    patch.ability_racial = { ...race.abilityBonus } as Partial<AbilityScores>;
+    if (sub?.abilityBonus) {
+      patch.ability_racial = {
+        ...race.abilityBonus,
+        ...sub.abilityBonus,
+      } as Partial<AbilityScores>;
+    }
   }
 
   const racialTraits = [...race.traits];

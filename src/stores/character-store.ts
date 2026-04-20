@@ -43,6 +43,7 @@ export const defaultDraft: CharacterDraft = {
   ability_scores: { ...defaultAbility },
   ability_racial: {},
   ability_growth: {},
+  useTashaRules: false,
   hp: 0,
   maxHp: 0,
   tempHp: 0,

@@ -77,6 +77,7 @@ export default function CharacterDetailPage() {
     ability_scores: c.ability_scores,
     ability_racial: fs.ability_racial || {},
     ability_growth: fs.ability_growth || {},
+    useTashaRules: fs.useTashaRules ?? false,
     hp: fs.hp ?? c.hp,
     maxHp: fs.maxHp ?? c.hp,
     tempHp: fs.tempHp ?? 0,

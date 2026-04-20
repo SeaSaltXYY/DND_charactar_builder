@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useCharacterStore } from "@/stores/character-store";
 import { ABILITY_KEYS, ABILITY_LABELS } from "@/data/constants";
 import { abilityModifier } from "@/lib/dice";
-import { computeTotalAbilities } from "@/lib/character-calc";
+import { computeTotalAbilities, autoFillFromRace } from "@/lib/character-calc";
 import type { AbilityKey } from "@/types/character";
 
 type Mode = "manual" | "standard" | "pointbuy";
@@ -23,6 +23,32 @@ export default function AbilitySection() {
   const update = useCharacterStore((s) => s.update);
   const updateAbility = useCharacterStore((s) => s.updateAbility);
   const [mode, setMode] = useState<Mode>("manual");
+  const useTasha = draft.useTashaRules;
+
+  const toggleTasha = () => {
+    const next = !useTasha;
+    if (next) {
+      update({ useTashaRules: true, ability_racial: {} });
+    } else {
+      const restored = autoFillFromRace({ ...draft, useTashaRules: false });
+      update({ useTashaRules: false, ability_racial: restored.ability_racial ?? {} });
+    }
+  };
+
+  const updateRacialBonus = (key: AbilityKey, val: number) => {
+    const current = { ...draft.ability_racial };
+    if (val === 0) {
+      delete current[key];
+    } else {
+      current[key] = val;
+    }
+    // 塔莎规则限制：只允许一个 +2 和一个 +1（不能在同一属性）
+    const values = Object.values(current).filter((v) => v && v > 0);
+    const has2 = values.filter((v) => v === 2).length;
+    const has1 = values.filter((v) => v === 1).length;
+    if (has2 > 1 || has1 > 1 || values.length > 2) return;
+    update({ ability_racial: current });
+  };
 
   const totals = computeTotalAbilities(draft);
 
@@ -55,8 +81,8 @@ export default function AbilitySection() {
 
   return (
     <div className="space-y-3">
-      {/* 模式选择 */}
-      <div className="flex gap-2">
+      {/* 模式选择 + 塔莎开关 */}
+      <div className="flex items-center gap-2 flex-wrap">
         {(["manual", "standard", "pointbuy"] as Mode[]).map((m) => (
           <button
             key={m}
@@ -70,6 +96,22 @@ export default function AbilitySection() {
             {m === "manual" ? "手动输入" : m === "standard" ? "标准阵列" : "点购法"}
           </button>
         ))}
+
+        <div className="ml-auto flex items-center gap-1.5">
+          <span className="text-[10px] text-amber-500 font-pixel">塔莎书</span>
+          <button
+            onClick={toggleTasha}
+            className={`relative w-9 h-5 rounded-full transition-colors ${
+              useTasha ? "bg-cyan-600" : "bg-gray-700"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                useTasha ? "translate-x-4" : ""
+              }`}
+            />
+          </button>
+        </div>
       </div>
 
       {mode === "pointbuy" && (
@@ -79,6 +121,22 @@ export default function AbilitySection() {
           </span> / 27
         </div>
       )}
+
+      {useTasha && (() => {
+        const racialVals = Object.values(draft.ability_racial).filter((v) => v && v > 0);
+        const has2 = racialVals.some((v) => v === 2);
+        const has1 = racialVals.some((v) => v === 1);
+        return (
+          <div className="text-[11px] text-cyan-400 font-pixel bg-cyan-950/30 border border-cyan-800/30 rounded px-2 py-1">
+            塔莎自定义种族加值：任选一项 +2，另一项 +1
+            <span className="ml-2">
+              {has2 ? "✓ +2" : "○ +2"}
+              {" "}
+              {has1 ? "✓ +1" : "○ +1"}
+            </span>
+          </div>
+        );
+      })()}
 
       {/* 六项属性 */}
       <div className="grid grid-cols-3 gap-2">
@@ -150,11 +208,26 @@ export default function AbilitySection() {
                 )}
               </div>
 
-              {/* 种族加值 (只读) */}
-              {racial !== 0 && (
-                <div className="text-[10px] text-cyan-400 mt-1">
-                  种族 {racial > 0 ? "+" : ""}{racial}
+              {/* 种族加值 */}
+              {useTasha ? (
+                <div className="mt-1">
+                  <div className="text-[10px] text-cyan-400 mb-0.5">种族(自选)</div>
+                  <select
+                    className="w-full px-1 py-0.5 bg-gray-900 border border-cyan-800/40 rounded text-xs text-center text-cyan-300 focus:outline-none focus:border-cyan-500"
+                    value={racial}
+                    onChange={(e) => updateRacialBonus(key, Number(e.target.value))}
+                  >
+                    <option value={0}>+0</option>
+                    <option value={1}>+1</option>
+                    <option value={2}>+2</option>
+                  </select>
                 </div>
+              ) : (
+                racial !== 0 && (
+                  <div className="text-[10px] text-cyan-400 mt-1">
+                    种族 {racial > 0 ? "+" : ""}{racial}
+                  </div>
+                )
               )}
 
               {/* 成长加值 (可编辑) */}
