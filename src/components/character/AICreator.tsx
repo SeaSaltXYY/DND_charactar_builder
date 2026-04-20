@@ -100,6 +100,9 @@ export default function AICreator() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [streamingText, setStreamingText] = useState("");
+  // 待确认的 AI patch
+  const [pendingPatch, setPendingPatch] = useState<Partial<CharacterDraft> | null>(null);
+  const [pendingFields, setPendingFields] = useState<string[]>([]);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -120,6 +123,7 @@ export default function AICreator() {
     const abort = new AbortController();
     abortRef.current = abort;
     let accumulated = "";
+    let collectedPatch: Partial<CharacterDraft> = {};
 
     const historyForAPI = [...messages, userMsg]
       .filter((m) => m.role !== "system")
@@ -147,6 +151,11 @@ export default function AICreator() {
             setMessages((prev) => [...prev, mkMsg("assistant", cleaned)]);
             setStreamingText("");
             setLoading(false);
+            // 有待应用的 patch，等用户确认
+            if (Object.keys(collectedPatch).length > 0) {
+              setPendingPatch(collectedPatch);
+              setPendingFields(Object.keys(collectedPatch));
+            }
           },
           onError: (err) => {
             setMessages((prev) => [...prev, mkMsg("assistant", `❌ 错误: ${err}`)]);
@@ -154,11 +163,8 @@ export default function AICreator() {
             setLoading(false);
           },
           onCharacterUpdate: (patch) => {
-            applyAIPatch(patch);
-            setMessages((prev) => [
-              ...prev,
-              mkMsg("system", `✅ 已自动更新角色表: ${Object.keys(patch).join(", ")}`),
-            ]);
+            // 合并 patch，等用户确认后再应用
+            collectedPatch = { ...collectedPatch, ...patch };
           },
         },
         abort.signal
@@ -167,6 +173,23 @@ export default function AICreator() {
       setLoading(false);
     }
   }, [input, loading, messages, draft, rulebookIds, applyAIPatch]);
+
+  const handleConfirmPatch = () => {
+    if (pendingPatch) {
+      applyAIPatch(pendingPatch);
+      setMessages((prev) => [
+        ...prev,
+        mkMsg("system", `✅ 已应用更新: ${pendingFields.join(", ")}`),
+      ]);
+    }
+    setPendingPatch(null);
+    setPendingFields([]);
+  };
+
+  const handleDiscardPatch = () => {
+    setPendingPatch(null);
+    setPendingFields([]);
+  };
 
   const handleStop = () => {
     abortRef.current?.abort();
@@ -247,6 +270,32 @@ export default function AICreator() {
             <div className="max-w-[85%] rounded-lg px-3 py-2 text-xs leading-relaxed bg-gray-800/60 text-amber-200 border border-amber-900/30 whitespace-pre-wrap">
               {streamingText}
               <span className="inline-block w-1.5 h-3 bg-amber-400 ml-0.5 animate-pulse" />
+            </div>
+          </div>
+        )}
+
+        {/* 待确认 patch 横幅 */}
+        {pendingPatch && !loading && (
+          <div className="sticky bottom-0 mx-1 rounded-lg border border-amber-500/60 bg-amber-950/80 backdrop-blur px-3 py-2 shadow-lg">
+            <div className="text-[11px] text-amber-300 font-pixel mb-1.5">
+              ✨ AI 建议更新以下字段：
+              <span className="ml-1 text-amber-500">
+                {pendingFields.join(" · ")}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleConfirmPatch}
+                className="flex-1 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-pixel rounded transition"
+              >
+                ✓ 确认应用
+              </button>
+              <button
+                onClick={handleDiscardPatch}
+                className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-pixel rounded transition"
+              >
+                忽略
+              </button>
             </div>
           </div>
         )}

@@ -159,25 +159,25 @@ export default function AbilitySection() {
 
               {/* 成长加值 (可编辑) */}
               <div className="mt-1">
-                <div className="text-[9px] text-amber-600">成长</div>
-                <div className="flex items-center justify-center gap-1">
+                <div className="text-[10px] text-amber-500">成长</div>
+                <div className="flex items-center justify-center gap-1.5">
                   <button
-                    className="px-0.5 text-[10px] text-amber-400 hover:text-amber-200 disabled:opacity-30"
+                    className="w-5 h-5 text-sm text-amber-400 hover:text-amber-200 disabled:opacity-30 leading-none"
                     disabled={growth <= 0}
                     onClick={() => updateGrowth(key, growth - 1)}
                   >−</button>
-                  <span className="text-[10px] text-amber-300 w-3 text-center">
+                  <span className="text-sm font-bold text-amber-200 w-6 text-center">
                     {growth > 0 ? `+${growth}` : "0"}
                   </span>
                   <button
-                    className="px-0.5 text-[10px] text-amber-400 hover:text-amber-200"
+                    className="w-5 h-5 text-sm text-amber-400 hover:text-amber-200 leading-none"
                     onClick={() => updateGrowth(key, growth + 1)}
                   >+</button>
                 </div>
               </div>
 
               {/* 分项汇总 */}
-              <div className="text-[9px] text-amber-700 mt-1 border-t border-amber-900/20 pt-0.5">
+              <div className="text-[10px] text-amber-700 mt-1 border-t border-amber-900/20 pt-0.5">
                 {base}{racial ? ` +${racial}族` : ""}{growth ? ` +${growth}长` : ""} = {total}
               </div>
             </div>

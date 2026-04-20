@@ -49,10 +49,10 @@ export function CharacterSheet({ draft }: Props) {
             )}
           </div>
           <div className="flex gap-2 flex-wrap">
-            <PixelBadge color="red">HP {draft.hp}/{draft.maxHp}</PixelBadge>
-            <PixelBadge color="blue">AC {draft.ac}</PixelBadge>
-            <PixelBadge color="gold">熟练 +{prof}</PixelBadge>
-            <PixelBadge color="green">先攻 {draft.initiative >= 0 ? "+" : ""}{draft.initiative}</PixelBadge>
+            <PixelBadge color="red" size="lg">HP {draft.hp}/{draft.maxHp}</PixelBadge>
+            <PixelBadge color="blue" size="lg">AC {draft.ac}</PixelBadge>
+            <PixelBadge color="gold" size="lg">熟练 +{prof}</PixelBadge>
+            <PixelBadge color="green" size="lg">先攻 {draft.initiative >= 0 ? "+" : ""}{draft.initiative}</PixelBadge>
           </div>
         </div>
 
@@ -80,21 +80,25 @@ export function CharacterSheet({ draft }: Props) {
         </div>
 
         {/* Combat stats */}
-        <div className="grid grid-cols-4 gap-2 text-center text-xs">
-          <div className="bg-[#e8c89a] border-2 border-[#8b6a3e] p-1">
-            <div className="font-silk">速度</div>
+        <div className="grid grid-cols-5 gap-2 text-center text-xs">
+          <div className="bg-[#e8c89a] border-2 border-[#8b6a3e] p-2">
+            <div className="font-silk text-[11px]">AC</div>
+            <div className="font-bold text-base">{draft.ac}</div>
+          </div>
+          <div className="bg-[#e8c89a] border-2 border-[#8b6a3e] p-2">
+            <div className="font-silk text-[11px]">速度</div>
             <div className="font-bold">{draft.speed}尺</div>
           </div>
-          <div className="bg-[#e8c89a] border-2 border-[#8b6a3e] p-1">
-            <div className="font-silk">生命骰</div>
+          <div className="bg-[#e8c89a] border-2 border-[#8b6a3e] p-2">
+            <div className="font-silk text-[11px]">生命骰</div>
             <div className="font-bold">{draft.hitDice || "—"}</div>
           </div>
-          <div className="bg-[#e8c89a] border-2 border-[#8b6a3e] p-1">
-            <div className="font-silk">体型</div>
+          <div className="bg-[#e8c89a] border-2 border-[#8b6a3e] p-2">
+            <div className="font-silk text-[11px]">体型</div>
             <div className="font-bold">{draft.size}</div>
           </div>
-          <div className="bg-[#e8c89a] border-2 border-[#8b6a3e] p-1">
-            <div className="font-silk">临时HP</div>
+          <div className="bg-[#e8c89a] border-2 border-[#8b6a3e] p-2">
+            <div className="font-silk text-[11px]">临时HP</div>
             <div className="font-bold">{draft.tempHp}</div>
           </div>
         </div>
