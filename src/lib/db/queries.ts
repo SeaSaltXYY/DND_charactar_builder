@@ -201,7 +201,7 @@ export function deleteCampaign(id: string) {
 
 /* ========== Characters ========== */
 
-export function saveCharacter(c: Partial<Character> & { name: string }): Character {
+export function saveCharacter(c: Partial<Character> & { name: string }, userId?: string | null): Character {
   const db = getDb();
   const id = c.id || uuid();
   const now = new Date().toISOString();
@@ -265,12 +265,13 @@ export function saveCharacter(c: Partial<Character> & { name: string }): Charact
     );
   } else {
     db.prepare(
-      `INSERT INTO characters (id, name, race, subrace, class, subclass, level,
+      `INSERT INTO characters (id, user_id, name, race, subrace, class, subclass, level,
         background, alignment, ability_scores, skills, equipment, spells, features,
         hp, ac, full_sheet, campaign_id, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       id,
+      userId || null,
       full.name,
       full.race,
       full.subrace,
@@ -295,25 +296,43 @@ export function saveCharacter(c: Partial<Character> & { name: string }): Charact
   return getCharacter(id)!;
 }
 
-export function getCharacter(id: string): Character | null {
+export function getCharacter(id: string, userId?: string | null): Character | null {
   const db = getDb();
-  const row = db
-    .prepare(`SELECT * FROM characters WHERE id = ?`)
-    .get(id) as Record<string, unknown> | undefined;
+  let row: Record<string, unknown> | undefined;
+  if (userId) {
+    row = db
+      .prepare(`SELECT * FROM characters WHERE id = ? AND user_id = ?`)
+      .get(id, userId) as Record<string, unknown> | undefined;
+  } else {
+    row = db
+      .prepare(`SELECT * FROM characters WHERE id = ?`)
+      .get(id) as Record<string, unknown> | undefined;
+  }
   if (!row) return null;
   return parseCharacterRow(row);
 }
 
-export function listCharacters(): Character[] {
+export function listCharacters(userId?: string | null): Character[] {
   const db = getDb();
-  const rows = db
-    .prepare(`SELECT * FROM characters ORDER BY updated_at DESC`)
-    .all() as Array<Record<string, unknown>>;
+  let rows: Array<Record<string, unknown>>;
+  if (userId) {
+    rows = db
+      .prepare(`SELECT * FROM characters WHERE user_id = ? ORDER BY updated_at DESC`)
+      .all(userId) as Array<Record<string, unknown>>;
+  } else {
+    rows = db
+      .prepare(`SELECT * FROM characters ORDER BY updated_at DESC`)
+      .all() as Array<Record<string, unknown>>;
+  }
   return rows.map(parseCharacterRow);
 }
 
-export function deleteCharacter(id: string) {
-  getDb().prepare(`DELETE FROM characters WHERE id = ?`).run(id);
+export function deleteCharacter(id: string, userId?: string | null) {
+  if (userId) {
+    getDb().prepare(`DELETE FROM characters WHERE id = ? AND user_id = ?`).run(id, userId);
+  } else {
+    getDb().prepare(`DELETE FROM characters WHERE id = ?`).run(id);
+  }
 }
 
 function parseCharacterRow(row: Record<string, unknown>): Character {

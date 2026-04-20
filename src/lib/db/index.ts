@@ -17,6 +17,7 @@ export function getDb(): Database.Database {
   _db.pragma("foreign_keys = ON");
 
   initSchema(_db);
+  migrate(_db);
   return _db;
 }
 
@@ -57,6 +58,7 @@ function initSchema(db: Database.Database) {
 
     CREATE TABLE IF NOT EXISTS characters (
       id TEXT PRIMARY KEY,
+      user_id TEXT,
       name TEXT NOT NULL,
       race TEXT,
       subrace TEXT,
@@ -78,6 +80,8 @@ function initSchema(db: Database.Database) {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    CREATE INDEX IF NOT EXISTS idx_characters_user ON characters(user_id);
+
     CREATE TABLE IF NOT EXISTS chat_sessions (
       id TEXT PRIMARY KEY,
       session_type TEXT NOT NULL,
@@ -86,6 +90,15 @@ function initSchema(db: Database.Database) {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
+}
+
+function migrate(db: Database.Database) {
+  const cols = db.prepare("PRAGMA table_info(characters)").all() as Array<{ name: string }>;
+  const hasUserId = cols.some((c) => c.name === "user_id");
+  if (!hasUserId) {
+    db.exec("ALTER TABLE characters ADD COLUMN user_id TEXT");
+    db.exec("CREATE INDEX IF NOT EXISTS idx_characters_user ON characters(user_id)");
+  }
 }
 
 export function resetDb() {
