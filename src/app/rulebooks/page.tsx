@@ -84,9 +84,6 @@ export default function RulebooksPage() {
             <Upload size={14} />
             {uploading ? "上传中..." : "上传规则书"}
           </PixelButton>
-          <PixelButton variant="blue" onClick={handleLoadBuiltin} disabled={uploading}>
-            <Sparkles size={14} /> 加载内置示例
-          </PixelButton>
         </div>
       </div>
 
@@ -178,16 +175,18 @@ export default function RulebooksPage() {
               <div className="text-xs text-[#4a3020]">
                 创建于 {new Date(b.created_at + "Z").toLocaleString()}
               </div>
-              <div className="flex justify-end pt-2">
-                <PixelButton
-                  variant="red"
-                  onClick={() => {
-                    if (confirm(`确定删除「${b.name}」？`)) remove(b.id);
-                  }}
-                >
-                  <Trash2 size={12} /> 删除
-                </PixelButton>
-              </div>
+              {b.id !== "builtin-prebuilt" && (
+                <div className="flex justify-end pt-2">
+                  <PixelButton
+                    variant="red"
+                    onClick={() => {
+                      if (confirm(`确定删除「${b.name}」？`)) remove(b.id);
+                    }}
+                  >
+                    <Trash2 size={12} /> 删除
+                  </PixelButton>
+                </div>
+              )}
             </div>
           </PixelCard>
         ))}

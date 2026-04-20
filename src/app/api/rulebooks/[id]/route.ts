@@ -16,6 +16,9 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  if (params.id === "builtin-prebuilt") {
+    return NextResponse.json({ error: "内置规则书不可删除" }, { status: 403 });
+  }
   deleteRulebook(params.id);
   return NextResponse.json({ ok: true });
 }
