@@ -1,7 +1,7 @@
 /**
- * 首次启动自动导入内置 5E 不全书种子。
- * 种子文件为 gzip 压缩的 JSON，包含预解析的文本 chunks（不含 embeddings）。
- * 首次导入时会异步计算 embeddings。
+ * 首次启动自动导入内置 5E 不全书。
+ * 优先使用预构建数据库（dnd-prebuilt.db.gz），直接解压到 /data/dnd.db，秒级完成。
+ * 若不存在预构建库则回退到实时向量化流程（需要 Embedding API）。
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -15,17 +15,17 @@ import {
 } from "./queries";
 import { embedTexts } from "@/lib/rag/embeddings";
 
-// standalone build 时 cwd 是 .next/standalone，src/data 被复制到同级
-// 普通 dev/build 时 cwd 是项目根
-const SEED_FILE = (() => {
+function findDataFile(filename: string): string | null {
   const candidates = [
-    path.resolve(process.cwd(), "src/data/rulebook-seed.json.gz"),
-    path.resolve(__dirname, "../../../data/rulebook-seed.json.gz"),
-    path.resolve(__dirname, "../../../../src/data/rulebook-seed.json.gz"),
+    path.resolve(process.cwd(), "src/data", filename),
+    path.resolve(__dirname, "../../../data", filename),
+    path.resolve(__dirname, "../../../../src/data", filename),
   ];
-  return candidates.find((p) => fs.existsSync(p)) ?? candidates[0];
-})();
+  return candidates.find((p) => fs.existsSync(p)) ?? null;
+}
 
+const PREBUILT_GZ = findDataFile("dnd-prebuilt.db.gz");
+const SEED_FILE = findDataFile("rulebook-seed.json.gz");
 const BUILTIN_NAME = "D&D 5E 不全书";
 
 let _seeding = false;
@@ -45,7 +45,7 @@ interface SeedData {
 
 export function shouldAutoSeed(): boolean {
   if (_seeding) return false;
-  if (!fs.existsSync(SEED_FILE)) return false;
+  if (!PREBUILT_GZ && !SEED_FILE) return false;
   const books = listRulebooks();
   return books.length === 0;
 }
@@ -58,7 +58,39 @@ export async function autoSeedBuiltinRulebook(): Promise<void> {
   if (_seeding) return;
   _seeding = true;
 
-  console.log("[auto-seed] 开始导入内置规则书...");
+  // ── 方案 A：预构建数据库，直接解压替换当前 DB ──────────────────
+  if (PREBUILT_GZ) {
+    console.log("[auto-seed] 发现预构建数据库，直接解压...");
+    try {
+      const dbPath = process.env.DATABASE_PATH || "./data/dnd.db";
+      const absDbPath = path.resolve(process.cwd(), dbPath);
+
+      // 确保目录存在
+      fs.mkdirSync(path.dirname(absDbPath), { recursive: true });
+
+      const gz = fs.readFileSync(PREBUILT_GZ);
+      const db = zlib.gunzipSync(gz);
+      fs.writeFileSync(absDbPath, db);
+
+      console.log(`[auto-seed] ✅ 预构建数据库已加载 (${(db.length / 1024 / 1024).toFixed(1)} MB)`);
+      // 重置 DB 连接，让下一次请求重新打开新 DB
+      const { resetDb } = await import("./index");
+      resetDb();
+      _seeding = false;
+      return;
+    } catch (e) {
+      console.error("[auto-seed] 预构建数据库加载失败，回退到实时向量化:", e);
+    }
+  }
+
+  // ── 方案 B：回退 - 实时向量化 ──────────────────────────────────
+  if (!SEED_FILE) {
+    console.error("[auto-seed] 种子文件不存在，跳过自动导入");
+    _seeding = false;
+    return;
+  }
+
+  console.log("[auto-seed] 开始实时向量化内置规则书...");
 
   let seed: SeedData;
   try {
@@ -71,12 +103,10 @@ export async function autoSeedBuiltinRulebook(): Promise<void> {
     return;
   }
 
-  console.log(
-    `[auto-seed] 种子: ${seed.name} (${seed.chunkCount} chunks)`
-  );
+  console.log(`[auto-seed] 种子: ${seed.name} (${seed.chunkCount} chunks)`);
 
   const book = createRulebook(BUILTIN_NAME, "builtin");
-  updateRulebookProgress(book.id, `导入中... 0/${seed.chunks.length} chunks`);
+  updateRulebookProgress(book.id, `向量化中... 0/${seed.chunks.length} chunks`);
 
   try {
     const BATCH = 8;
@@ -93,7 +123,7 @@ export async function autoSeedBuiltinRulebook(): Promise<void> {
 
     for (let i = 0; i < seed.chunks.length; i += BATCH) {
       const batch = seed.chunks.slice(i, i + BATCH);
-      const texts = batch.map((c) => c.content);
+      const texts = batch.map((c) => c.content.slice(0, 400));
 
       let embeddings: number[][];
       try {
@@ -121,25 +151,15 @@ export async function autoSeedBuiltinRulebook(): Promise<void> {
         buf = [];
       }
 
-      const pct = Math.min(
-        100,
-        Math.round((embedded / seed.chunks.length) * 100)
-      );
-      updateRulebookProgress(
-        book.id,
-        `向量化 ${pct}% (${embedded}/${seed.chunks.length})`
-      );
+      const pct = Math.min(100, Math.round((embedded / seed.chunks.length) * 100));
+      updateRulebookProgress(book.id, `向量化 ${pct}% (${embedded}/${seed.chunks.length})`);
 
-      if (embedded % 100 === 0) {
-        console.log(
-          `[auto-seed] 进度: ${pct}% (${embedded}/${seed.chunks.length})`
-        );
+      if (embedded % 200 === 0) {
+        console.log(`[auto-seed] 进度: ${pct}% (${embedded}/${seed.chunks.length})`);
       }
     }
 
-    if (buf.length > 0) {
-      insertChunks(buf);
-    }
+    if (buf.length > 0) insertChunks(buf);
 
     updateRulebookStatus(book.id, "ready", embedded);
     updateRulebookProgress(book.id, `完成! ${embedded} chunks`);
@@ -147,10 +167,7 @@ export async function autoSeedBuiltinRulebook(): Promise<void> {
   } catch (e) {
     console.error("[auto-seed] 导入失败:", e);
     updateRulebookStatus(book.id, "error");
-    updateRulebookProgress(
-      book.id,
-      `错误: ${e instanceof Error ? e.message : String(e)}`
-    );
+    updateRulebookProgress(book.id, `错误: ${e instanceof Error ? e.message : String(e)}`);
   } finally {
     _seeding = false;
   }

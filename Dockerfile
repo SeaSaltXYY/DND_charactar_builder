@@ -43,4 +43,5 @@ ENV HOSTNAME="0.0.0.0"
 ENV DATABASE_PATH=/data/dnd.db
 
 # 启动时确保数据目录存在后再运行
+# 启动时：若 /data/dnd.db 不存在则从预构建库解压（auto-seed.ts 也有此逻辑作兜底）
 CMD ["sh", "-c", "mkdir -p /data/uploads && node server.js"]
