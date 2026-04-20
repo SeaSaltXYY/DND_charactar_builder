@@ -88,6 +88,13 @@ export function insertChunks(
   tx(chunks);
 }
 
+const EXCLUDED_CHAPTERS_2024 = [
+  "第四章：角色起源 Character Origins",
+  "第八章 ： 据点 Bastion",
+  "第十章：施法Spellcasting",
+  "第七章：宝藏 Treasure",
+];
+
 export function getAllChunks(rulebookIds?: string[]): Array<{
   id: string;
   rulebook_id: string;
@@ -98,6 +105,8 @@ export function getAllChunks(rulebookIds?: string[]): Array<{
   embedding: number[];
 }> {
   const db = getDb();
+  const excludePlaceholders = EXCLUDED_CHAPTERS_2024.map(() => "?").join(",");
+  const excludeClause = `c.chapter NOT IN (${excludePlaceholders})`;
   let rows: Array<Record<string, unknown>>;
   if (rulebookIds && rulebookIds.length > 0) {
     const placeholders = rulebookIds.map(() => "?").join(",");
@@ -107,18 +116,20 @@ export function getAllChunks(rulebookIds?: string[]): Array<{
                 c.page_number, c.embedding
            FROM rulebook_chunks c
            JOIN rulebooks r ON r.id = c.rulebook_id
-          WHERE c.rulebook_id IN (${placeholders})`
+          WHERE c.rulebook_id IN (${placeholders})
+            AND ${excludeClause}`
       )
-      .all(...rulebookIds) as Array<Record<string, unknown>>;
+      .all(...rulebookIds, ...EXCLUDED_CHAPTERS_2024) as Array<Record<string, unknown>>;
   } else {
     rows = db
       .prepare(
         `SELECT c.id, c.rulebook_id, r.name AS rulebook_name, c.content, c.chapter,
                 c.page_number, c.embedding
            FROM rulebook_chunks c
-           JOIN rulebooks r ON r.id = c.rulebook_id`
+           JOIN rulebooks r ON r.id = c.rulebook_id
+          WHERE ${excludeClause}`
       )
-      .all() as Array<Record<string, unknown>>;
+      .all(...EXCLUDED_CHAPTERS_2024) as Array<Record<string, unknown>>;
   }
   return rows.map((r) => ({
     id: r.id as string,

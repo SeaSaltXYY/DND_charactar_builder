@@ -271,9 +271,9 @@ export default function ChatPage() {
             rows={2}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="输入你的规则问题... (Ctrl/Cmd+Enter 发送)"
+            placeholder="输入你的规则问题... (Enter 发送，Shift+Enter 换行)"
             onKeyDown={(e) => {
-              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+              if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 send();
               }

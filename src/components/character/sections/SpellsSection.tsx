@@ -1,23 +1,40 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { useCharacterStore } from "@/stores/character-store";
-import { getSpellsByClass, SPELLS } from "@/data/spells";
+import { getSpellsByClass, SPELLS, SPELL_SOURCES } from "@/data/spells";
+
+const PHB = "玩家手册";
+const EXPANSION_SOURCES = SPELL_SOURCES.filter((s) => s !== PHB);
 
 export default function SpellsSection() {
   const draft = useCharacterStore((s) => s.draft);
   const update = useCharacterStore((s) => s.update);
   const [filterLevel, setFilterLevel] = useState<number | null>(null);
   const [search, setSearch] = useState("");
+  const [enabledSources, setEnabledSources] = useState<Set<string>>(
+    new Set([PHB])
+  );
+  const [showSourcePanel, setShowSourcePanel] = useState(false);
+
+  const toggleSource = (src: string) => {
+    setEnabledSources((prev) => {
+      const next = new Set(prev);
+      if (next.has(src)) next.delete(src);
+      else next.add(src);
+      return next;
+    });
+  };
 
   const available = useMemo(() => {
     let list = draft.class ? getSpellsByClass(draft.class) : SPELLS;
+    list = list.filter((s) => enabledSources.has(s.source));
     if (filterLevel !== null) list = list.filter((s) => s.level === filterLevel);
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((s) => s.name.toLowerCase().includes(q));
     }
     return list;
-  }, [draft.class, filterLevel, search]);
+  }, [draft.class, filterLevel, search, enabledSources]);
 
   const toggleCantrip = (name: string) => {
     const arr = draft.knownCantrips.includes(name)
@@ -55,6 +72,44 @@ export default function SpellsSection() {
         <span>戏法: {draft.knownCantrips.length}</span>
         <span>已知: {draft.knownSpells.length}</span>
         <span>已准备: {draft.preparedSpells.length}</span>
+      </div>
+
+      {/* 出处开关 */}
+      <div className="space-y-1.5">
+        <button
+          onClick={() => setShowSourcePanel(!showSourcePanel)}
+          className="text-[11px] font-pixel text-cyan-400 hover:text-cyan-300 transition"
+        >
+          📚 扩展书来源 ({enabledSources.size - (enabledSources.has(PHB) ? 1 : 0)}/{EXPANSION_SOURCES.length} 已开启)
+          <span className="ml-1">{showSourcePanel ? "▲" : "▼"}</span>
+        </button>
+        {showSourcePanel && (
+          <div className="grid grid-cols-2 gap-1 bg-cyan-950/20 border border-cyan-800/30 rounded p-2">
+            <div className="col-span-2 text-[10px] text-cyan-500 mb-0.5">
+              玩家手册法术始终显示，以下为扩展来源：
+            </div>
+            {EXPANSION_SOURCES.map((src) => (
+              <label
+                key={src}
+                className="flex items-center gap-1.5 text-[11px] text-cyan-300 cursor-pointer hover:text-cyan-200"
+              >
+                <button
+                  onClick={() => toggleSource(src)}
+                  className={`relative w-7 h-3.5 rounded-full transition-colors flex-shrink-0 ${
+                    enabledSources.has(src) ? "bg-cyan-600" : "bg-gray-700"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 w-2.5 h-2.5 bg-white rounded-full shadow transition-transform ${
+                      enabledSources.has(src) ? "translate-x-3" : ""
+                    }`}
+                  />
+                </button>
+                {src}
+              </label>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 筛选 */}
@@ -106,12 +161,17 @@ export default function SpellsSection() {
                 }
                 className="accent-amber-500"
               />
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <span className="text-amber-200">{spell.name}</span>
                 <span className="ml-2 text-[10px] text-amber-600">
                   {isCantrip ? "戏法" : `${spell.level}环`} · {spell.school}
                   {spell.concentration && " · 专注"}
                 </span>
+                {spell.source !== PHB && (
+                  <span className="ml-1 text-[9px] text-cyan-500/70">
+                    [{spell.source}]
+                  </span>
+                )}
               </div>
               {known && !isCantrip && (
                 <label className="flex items-center gap-1 text-[10px] text-amber-400 cursor-pointer">
