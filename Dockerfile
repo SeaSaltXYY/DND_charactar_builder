@@ -27,21 +27,13 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
 # 复制构建产物（public 目录可能不存在，先建空目录兜底）
 RUN mkdir -p ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 # 复制数据文件（种子文件、源码数据，用于运行时访问）
 COPY --from=builder /app/src/data ./src/data
-
-# 创建数据目录（用于 SQLite 数据库和上传文件）
-RUN mkdir -p /data/uploads && chown -R nextjs:nodejs /data
-
-USER nextjs
 
 EXPOSE 3000
 
@@ -50,4 +42,5 @@ ENV HOSTNAME="0.0.0.0"
 # 数据库存放在持久化卷 /data
 ENV DATABASE_PATH=/data/dnd.db
 
-CMD ["node", "server.js"]
+# 启动时确保数据目录存在后再运行
+CMD ["sh", "-c", "mkdir -p /data/uploads && node server.js"]
