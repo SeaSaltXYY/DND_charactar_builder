@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { Trash2, UserPlus, Users, Download } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Trash2, UserPlus, Users, Download, Upload } from "lucide-react";
 import { PixelCard } from "@/components/ui/PixelCard";
 import { PixelButton } from "@/components/ui/PixelButton";
 import { PixelBadge } from "@/components/ui/PixelBadge";
@@ -9,6 +9,7 @@ import type { Character } from "@/types/character";
 
 export default function CharactersPage() {
   const [list, setList] = useState<Character[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     const r = await fetch("/api/characters").then((r) => r.json());
@@ -24,7 +25,7 @@ export default function CharactersPage() {
     await load();
   }
 
-  function exportJSON(c: Character) {
+  function exportChar(c: Character) {
     const blob = new Blob([JSON.stringify(c, null, 2)], {
       type: "application/json",
     });
@@ -36,15 +37,58 @@ export default function CharactersPage() {
     URL.revokeObjectURL(url);
   }
 
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data.name) {
+        alert("导入失败：JSON 中缺少角色名（name 字段）");
+        return;
+      }
+      const { id: _removed, created_at: _ca, updated_at: _ua, ...rest } = data;
+      const resp = await fetch("/api/characters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(rest),
+      });
+      if (!resp.ok) {
+        alert("导入失败：服务器错误");
+        return;
+      }
+      await load();
+      alert(`成功导入角色「${data.name}」`);
+    } catch {
+      alert("导入失败：请确保文件是有效的角色 JSON");
+    }
+    if (fileRef.current) fileRef.current.value = "";
+  }
+
   return (
     <div className="mx-auto w-full max-w-6xl">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="font-pixel-title text-pixel-lg text-pixel-gold text-shadow-pixel">
           👥 角色卡
         </h1>
-        <Link href="/create-character" className="pixel-btn pixel-btn-gold">
-          <UserPlus size={14} /> 新建角色
-        </Link>
+        <div className="flex gap-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".json"
+            className="hidden"
+            onChange={handleImport}
+          />
+          <button
+            className="pixel-btn"
+            onClick={() => fileRef.current?.click()}
+          >
+            <Upload size={14} /> 导入角色
+          </button>
+          <Link href="/create-character" className="pixel-btn pixel-btn-gold">
+            <UserPlus size={14} /> 新建角色
+          </Link>
+        </div>
       </div>
 
       {list.length === 0 ? (
@@ -87,7 +131,7 @@ export default function CharactersPage() {
                   >
                     查看
                   </Link>
-                  <PixelButton onClick={() => exportJSON(c)}>
+                  <PixelButton onClick={() => exportChar(c)}>
                     <Download size={12} />
                   </PixelButton>
                   <PixelButton variant="red" onClick={() => remove(c.id)}>

@@ -135,7 +135,7 @@ export default function CreateCharacterPage() {
             className="px-3 py-1 text-xs font-pixel bg-gray-800/60 border border-amber-900/40 rounded text-amber-400 hover:border-amber-600 transition"
             onClick={handleExportJSON}
           >
-            📥 导出 JSON
+            📥 导出角色
           </button>
 
           <button

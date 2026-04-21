@@ -31,7 +31,7 @@ export function Step9Preview({ onSave, saving }: Props) {
           <Save size={14} /> {saving ? "保存中..." : "保存到角色库"}
         </PixelButton>
         <PixelButton onClick={exportJSON}>
-          <Download size={14} /> 导出 JSON
+          <Download size={14} /> 导出角色
         </PixelButton>
       </div>
       <CharacterSheet draft={draft} />
